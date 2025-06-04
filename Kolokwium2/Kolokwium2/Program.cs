@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Kolokwium2.Data;
+using Kolokwium2.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,14 +14,15 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 
-// builder.Services.AddDbContext<ApbdContext>(opt =>
-// {
-//     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-// });
+builder.Services.AddDbContext<ApbdContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 // add scoped
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 var app = builder.Build();
 
