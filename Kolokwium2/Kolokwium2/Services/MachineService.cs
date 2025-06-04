@@ -2,6 +2,7 @@
 using Kolokwium2.DTOs;
 using Kolokwium2.Exceptions;
 using Kolokwium2.Models;
+using Microsoft.EntityFrameworkCore;
 using DataException = System.Data.DataException;
 
 namespace Kolokwium2.Services;
@@ -33,24 +34,34 @@ public class MachineService: IMachineService
             throw new MachineAlreadyExistsException($"Już istnieje pralka o numerze seryjnym: {request.WashingMachine.SerialNumber}");
         }
 
+        var programs = new List<ProgramEntity>();
+        
         foreach (var program in request.AvailablePrograms)
         {
-            if (!_context.Programs.Any(p => p.Name == program.ProgramName))
+            var contextProgram = await _context.Programs.FirstOrDefaultAsync(a => a.Name == program.ProgramName);
+            if (contextProgram == null)
             {
                 throw new ProgramNotFoundException($"Nie znaleziono programu o nazwie: {program.ProgramName}");
             }
+            programs.Add(contextProgram);
         }
-        
-        _context.WashingMachines.Add(new Washing_Machine()
+
+        var washingMachine = new Washing_Machine()
         {
             SerialNumber = request.WashingMachine.SerialNumber,
             MaxWeight = request.WashingMachine.MaxWeight,
-            AvailablePrograms = request.AvailablePrograms.Select(p => new Available_Program()
+            AvailablePrograms = new List<Available_Program>()
+        };
+
+        _context.WashingMachines.Add(washingMachine);
+
+        foreach (var program in programs)
+        {
+            washingMachine.AvailablePrograms.Add(new Available_Program()
             {
-                Price = p.Price,
-                
-            }).ToList()
-        });
+                Price = 
+            });
+        }
 
     }
 }
